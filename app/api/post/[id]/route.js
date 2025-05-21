@@ -1,11 +1,13 @@
 import connectMongo from "../../../../util/connectMongo";
 import PostModel from "../../../../models/postModel";
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   try {
     await connectMongo();
 
-    const post = await PostModel.findById(params.id);
+    const { id } = await context.params; // ✅ unwrap the Promise
+
+    const post = await PostModel.findById(id);
     if (!post) {
       return new Response(JSON.stringify({ message: "Post not found" }), { status: 404 });
     }

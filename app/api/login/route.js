@@ -5,7 +5,11 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
-  const { email, password } = await req.json();
+  const { email:email, password : password } = await req.json();
+
+  console.log("the user email is " , email);
+
+
   await connectMongo();
 
   const user = await User.findOne({ email });
@@ -26,7 +30,7 @@ export async function POST(req) {
 
   // create JWT token
   const token = jwt.sign(tokenData, process.env.TOKEN_SECRET, {
-    expiresIn: "30m",
+    expiresIn: "1d",
   });
 
   // prepare response with cookie

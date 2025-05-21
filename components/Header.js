@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+//import { toast } from "react-toastify"; // Optional, if you're using it
 
 export default function Header() {
   const [user, setUser] = useState(null);
@@ -12,6 +14,10 @@ export default function Header() {
     async function fetchUser() {
       try {
         const res = await fetch("/api/me");
+        if (res.status === 401) {
+          setUser(null);
+          return;
+        }
         const data = await res.json();
         setUser(data.user);
       } catch (error) {
@@ -21,7 +27,6 @@ export default function Header() {
 
     fetchUser();
 
-    // Listen for user changes (login/logout)
     const handleUserChange = () => {
       fetchUser();
     };
@@ -33,18 +38,24 @@ export default function Header() {
     };
   }, []);
 
-  const handleLogout = () => {
-    // Clear cookie on server - you might want to create a /api/logout route
-    // For now, just dispatch event and reload
-    window.dispatchEvent(new Event("userChanged"));
-    router.push("/");
+  const logout = async () => {
+    try {
+      await axios.get("/api/logout");
+      window.dispatchEvent(new Event("userChanged"));
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error.message);
+      toast?.error("Logout failed");
+    }
   };
 
   return (
     <header className="bg-white shadow-lg">
       <div className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/">
-          <h1 className="text-2xl font-bold">{user ? `Hi, ${user.username}` : "My Blog"}</h1>
+          <h1 className="text-2xl font-bold">
+            {user ? `Hi, ${user.username}` : "My Blog"}
+          </h1>
         </Link>
 
         <nav className="space-x-4 flex items-center">
@@ -56,7 +67,7 @@ export default function Header() {
               <span className="text-gray-700">Hi, {user.username}</span>
               <Link href="/profile" className="text-blue-500 hover:underline">Profile</Link>
               <button
-                onClick={handleLogout}
+                onClick={logout}
                 className="text-red-500 hover:underline"
               >
                 Logout

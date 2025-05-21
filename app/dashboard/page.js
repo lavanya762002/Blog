@@ -47,7 +47,7 @@ export default function DashboardPage() {
       {blogs.length === 0 ? (
         <p className="text-gray-600">You haven't posted anything yet.</p>
       ) : (
-        blogs.map((blog) => (
+        blogs.map(blog => (
           <div key={blog._id} className="border p-4 mb-4 rounded shadow">
             <h3 className="text-xl font-semibold">{blog.title}</h3>
             <p className="text-gray-700">{blog.content}</p>

@@ -1,18 +1,18 @@
 "use client"
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react"
 
 
 export default function Post({params}) {
     const router = useRouter()
-    const id = params.id;
+    const {id} = useParams();
     const [post,setPost] = useState(null);
     
 
     useEffect(() => {
-  fetch(process.env.NEXT_PUBLIC_API_URL + '/post/' + id)
+  fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${id}`)
     .then(res => res.json())
     .then(res => setPost(res));
 }, [id]);
