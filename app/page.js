@@ -39,11 +39,11 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          {posts.map((post) =>(
+          {posts.map(post =>(
             <Link href={"/post/"+ post._id}>
                < div key={post._id} className="border border-gray-200 p-4">
             <img
-              className="w-full h-48 object-cover mb-4"
+              className="w-full h-48 object-cover mb-4"  
               src={post.image}
               alt="Post Image"
             />

@@ -5,7 +5,7 @@ export async function GET(req, context) {
   try {
     await connectMongo();
 
-    const { id } = await context.params; // ✅ unwrap the Promise
+    const { id } = await context.params; //unwrap the Promise
 
     const post = await PostModel.findById(id);
     if (!post) {

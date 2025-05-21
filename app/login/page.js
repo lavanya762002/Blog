@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button"
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,32 +11,34 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-
+} from "@/components/ui/card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   const handleLogin = async () => {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // important!
-      },
-      body: JSON.stringify({ email, password }),
+    setLoading(true);
+    setError(null);
+
+    const res = await signIn("credentials", {
+      redirect: false, // keep it SPA-style
+      email,
+      password,
     });
 
-    const data = await res.json();
+    setLoading(false);
 
-    if (data.success) {
-      // save user info locally for UI state
-      localStorage.setItem("user", JSON.stringify(data.user));
-      window.dispatchEvent(new Event("userChanged")); // notify other parts of app
-      router.push("/dashboard");
+    if (res.error) {
+      setError(res.error);
     } else {
-      alert(data.error || "Invalid credentials");
+      // Login success - navigate to dashboard
+      router.push("/dashboard");
+      // Optionally, you can emit a global event here if needed
+      window.dispatchEvent(new Event("userChanged"));
     }
   };
 
@@ -60,17 +64,14 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className="text-red-600 mb-4">{error}</p>}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={handleLogin}>
-            Login
+          <Button className="w-full" onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </CardFooter>
       </Card>
     </div>
   );
 }
-
-
-
-

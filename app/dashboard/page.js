@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
+
 export default function DashboardPage() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
