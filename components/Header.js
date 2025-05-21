@@ -8,17 +8,22 @@ export default function Header() {
   const [user, setUser] = useState(null);
   const router = useRouter();
 
-  // Load user on initial render
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/me");
+        const data = await res.json();
+        setUser(data.user);
+      } catch (error) {
+        setUser(null);
+      }
     }
 
-    // Listen for user changes (login/register/logout)
+    fetchUser();
+
+    // Listen for user changes (login/logout)
     const handleUserChange = () => {
-      const updatedUser = localStorage.getItem("user");
-      setUser(updatedUser ? JSON.parse(updatedUser) : null);
+      fetchUser();
     };
 
     window.addEventListener("userChanged", handleUserChange);
@@ -29,10 +34,10 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    window.dispatchEvent(new Event("userChanged")); // Trigger header re-render
-    router.push("/"); // Redirect using Next.js router
+    // Clear cookie on server - you might want to create a /api/logout route
+    // For now, just dispatch event and reload
+    window.dispatchEvent(new Event("userChanged"));
+    router.push("/");
   };
 
   return (

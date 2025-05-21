@@ -1,6 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,43 +20,57 @@ export default function LoginPage() {
   const handleLogin = async () => {
     const res = await fetch("/api/login", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json", // important!
+      },
       body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
 
-    if (data.username) {
-      localStorage.setItem("user", JSON.stringify(data));
-      window.dispatchEvent(new Event("userChanged")); // 👈 notify Header to update
+    if (data.success) {
+      // save user info locally for UI state
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("userChanged")); // notify other parts of app
       router.push("/dashboard");
     } else {
-      alert("Invalid credentials");
+      alert(data.error || "Invalid credentials");
     }
   };
 
   return (
     <div className="max-w-md mx-auto py-10">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        className="border p-2 w-full mb-4"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="border p-2 w-full mb-4"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        onClick={handleLogin}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Login
-      </button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Login</CardTitle>
+          <CardDescription>Enter your email and password to login.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <input
+            type="email"
+            placeholder="Email"
+            className="border p-2 w-full mb-4 rounded"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="border p-2 w-full mb-4 rounded"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </CardContent>
+        <CardFooter>
+          <Button className="w-full" onClick={handleLogin}>
+            Login
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
+
+
+
+

@@ -1,26 +1,44 @@
-// app/dashboard/page.js
 "use client";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
+    async function fetchUserAndBlogs() {
+      try {
+        
+        const resUser = await fetch("/api/me");
+        const dataUser = await resUser.json();
 
-    const fetchBlogs = async () => {
-      const res = await fetch(`/api/user-blogs?userId=${user._id}`);
-      const data = await res.json();
-      setBlogs(data);
-      setLoading(false);
-    };
+        if (!dataUser.user) {
+          setUser(null);
+          setLoading(false);
+          return; 
+        }
 
-    fetchBlogs();
+        setUser(dataUser.user);
+
+       
+        const resBlogs = await fetch(`/api/user-blogs?userId=${dataUser.user.id}`);
+        const dataBlogs = await resBlogs.json();
+
+        setBlogs(dataBlogs);
+        setLoading(false);
+      } catch (error) {
+        setUser(null);
+        setLoading(false);
+      }
+    }
+
+    fetchUserAndBlogs();
   }, []);
 
   if (loading) return <p>Loading your blogs...</p>;
+
+  if (!user) return <p>Please log in to view your dashboard.</p>;
 
   return (
     <div className="max-w-2xl mx-auto py-10">

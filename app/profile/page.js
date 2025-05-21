@@ -6,10 +6,18 @@ export default function Profile() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    async function fetchUser() {
+      const resUser = await fetch("/api/me");
+      const dataUser = await resUser.json();
+
+      if (dataUser.user) {
+        setUser(dataUser.user);
+      } else {
+        setUser(null);
+      }
     }
+
+    fetchUser();
   }, []);
 
   if (!user) return <p className="p-4">Please login to view profile.</p>;
