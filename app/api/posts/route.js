@@ -1,50 +1,73 @@
 import connectMongo from "../../../util/connectMongo";
 import PostModel from "../../../models/postModel";
-
-await connectMongo();
-
+ 
 export async function GET(req) {
+  await connectMongo();
+ 
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q");
-
+ 
   try {
-    let postData;
-
+    let posts;
     if (query) {
-      postData = await PostModel.find({
+      posts = await PostModel.find({
         $or: [
-          { title: new RegExp(query, "i") },
-          { description: new RegExp(query, "i") },
+          { title: { $regex: query, $options: "i" } },
+          { description: { $regex: query, $options: "i" } },
         ],
       });
     } else {
-      postData = await PostModel.find({});
+      posts = await PostModel.find({});
     }
-
-    return Response.json(postData);
+ 
+    return new Response(JSON.stringify(posts), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    return Response.json({ message: error.message }, { status: 500 });
+    return new Response(JSON.stringify({ message: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
+ 
+
 
 export async function POST(req) {
+  console.log(req);
+  await connectMongo();
+ 
   try {
     const body = await req.json();
-    const { title, description, isPublic, userId } = body;
-
-    if (!userId || !title || !description) {
-      return Response.json({ message: "Missing required fields" }, { status: 400 });
+    const { title, description, isPublic, userId, image } = body;
+ 
+    if (!title || !description || !userId) {
+      return new Response(JSON.stringify({ message: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-
+ 
     const newPost = await PostModel.create({
       title,
       description,
       isPublic: isPublic ?? true,
       userId,
+      image,
     });
 
-    return Response.json(newPost);
-  } catch (error) {
-    return Response.json({ message: error.message }, { status: 500 });
+    console.log(newPost);
+ 
+    return new Response(JSON.stringify(newPost), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ message: err.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
+ 
